@@ -36,13 +36,13 @@
         const GITHUB_TOKEN = "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"; // ⚠️ NEVER expose this in public
         const REPO_OWNER = "sarathch66";
         const REPO_NAME = "profiledata3";
-        const FILE_PATH = "./profiles.json"; // Path to your JSON file
+        const FILE_PATH = "profiles.json"; // Path to your JSON file
         const BRANCH = "main"; // Use your branch name
 
         async function fetchJsonFile() {
-            const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/${FILE_PATH}`;
+            const url = 'https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}';
             const response = await fetch(url, {
-                headers: { Authorization: `token ${GITHUB_TOKEN}` }
+                headers: { Authorization: 'token ${GITHUB_TOKEN}' }
             });
 
             if (!response.ok) {
@@ -56,11 +56,11 @@
         }
 
         async function updateJsonFile() {
-            const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/${FILE_PATH}`;
+            const url = 'https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}';
 
             // Fetch existing JSON
             const response = await fetch(url, {
-                headers: { Authorization: `token ${GITHUB_TOKEN}` }
+                headers: { Authorization: 'token ${GITHUB_TOKEN}' }
             });
 
             if (!response.ok) {
