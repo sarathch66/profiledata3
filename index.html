@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update JSON on GitHub</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; text-align: center; }
+        form { max-width: 400px; margin: auto; }
+        label, input { display: block; width: 100%; margin-bottom: 10px; }
+        button { padding: 10px; background: blue; color: white; border: none; cursor: pointer; }
+        pre { background: #f4f4f4; padding: 10px; text-align: left; max-width: 500px; margin: auto; }
+    </style>
+</head>
+<body>
+
+    <h2>Update JSON File on GitHub</h2>
+
+    <form id="profileForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" required>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" required>
+
+        <label for="age">Age:</label>
+        <input type="number" id="age" required>
+
+        <button type="button" onclick="updateJsonFile()">Update JSON</button>
+    </form>
+
+    <h3>Current JSON Data:</h3>
+    <pre id="jsonContent">Loading...</pre>
+
+    <script>
+        const GITHUB_TOKEN = "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"; // ⚠️ NEVER expose this in public
+        const REPO_OWNER = "sarathch66";
+        const REPO_NAME = "profiledata3";
+        const FILE_PATH = "profiles.json"; // Path to your JSON file
+        const BRANCH = "main"; // Use your branch name
+
+        async function fetchJsonFile() {
+            const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+            const response = await fetch(url, {
+                headers: { Authorization: `token ${GITHUB_TOKEN}` }
+            });
+
+            if (!response.ok) {
+                document.getElementById("jsonContent").textContent = "Failed to load JSON.";
+                return;
+            }
+
+            const fileData = await response.json();
+            const jsonData = JSON.parse(atob(fileData.content));
+            document.getElementById("jsonContent").textContent = JSON.stringify(jsonData, null, 2);
+        }
+
+        async function updateJsonFile() {
+            const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+
+            // Fetch existing JSON
+            const response = await fetch(url, {
+                headers: { Authorization: `token ${GITHUB_TOKEN}` }
+            });
+
+            if (!response.ok) {
+                alert("Failed to fetch JSON file.");
+                return;
+            }
+
+            const fileData = await response.json();
+            let jsonData = JSON.parse(atob(fileData.content));
+
+            // Add new profile
+            const newProfile = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                age: document.getElementById('age').value
+            };
+            jsonData.push(newProfile);
+
+            // Encode updated JSON
+            const updatedContent = btoa(JSON.stringify(jsonData, null, 2));
+
+            // Update file on GitHub
+            const updateResponse = await fetch(url, {
+                method: "PUT",
+                headers: {
+                    Authorization: `token ${GITHUB_TOKEN}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    message: "Updated JSON file",
+                    content: updatedContent,
+                    sha: fileData.sha, // Required to update file
+                    branch: BRANCH
+                })
+            });
+
+            if (updateResponse.ok) {
+                alert("JSON file updated successfully!");
+                fetchJsonFile(); // Reload updated JSON
+            } else {
+                alert("Failed to update JSON file.");
+            }
+        }
+
+        // Load JSON on page load
+        fetchJsonFile();
+    </script>
+
+</body>
+</html>
